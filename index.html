@@ -15,15 +15,7 @@
     <title>Frontend Mentor | Multi-step form</title>
 
     <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
-    <style>
-      .attribution {
-        font-size: 11px;
-        text-align: center;
-      }
-      .attribution a {
-        color: hsl(228, 45%, 44%);
-      }
-    </style>
+    <style></style>
   </head>
   <body>
     <main>
@@ -63,203 +55,225 @@
               </ul>
             </div>
           </aside>
-          <div class="modal-forms">
-            <div class="step-1 d-none">
-              <h1 class="form-title">Personal info</h1>
-              <p class="form-info">
+          <div id="modal-forms" class="modal-forms">
+            <div class="step-1">
+              <h1 id="form-title" class="form-title">Personal info</h1>
+              <p id="form-info" class="form-info">
                 Please provide your name, email address, and phone number.
               </p>
 
               <form id="userForm">
-                <div class="form-group">
-                  <label for="name"> Name </label>
-                  <input
-                    type="text"
-                    id="name"
-                    placeholder="e.g. Stephen King"
-                  />
+                <div class="steps current">
+                  <div class="form-group">
+                    <div class="form-labels">
+                      <label for="name"> Name </label
+                      ><span class="validation-message d-none"
+                        >This field is required</span
+                      >
+                    </div>
+                    <input
+                      type="text"
+                      id="name"
+                      placeholder="e.g. Stephen King"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <div class="form-labels">
+                      <label for="email"> Email Address </label>
+                      <span class="validation-message d-none"
+                        >This field is required</span
+                      >
+                    </div>
+
+                    <input
+                      type="email"
+                      id="email"
+                      placeholder="e.g. stephenking@lorem.com"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <div class="form-labels">
+                      <label for="phone"> Phone Number </label>
+                      <span class="validation-message d-none"
+                        >This field is required</span
+                      >
+                    </div>
+                    <input
+                      type="tel"
+                      id="phone"
+                      placeholder="e.g. +1 234 567 890"
+                    />
+                  </div>
                 </div>
 
-                <div class="form-group">
-                  <label for="email"> Email Address </label>
-                  <input
-                    type="email"
-                    id="email"
-                    placeholder="e.g. stephenking@lorem.com"
-                  />
+                <div class="steps d-none">
+                  <div class="billings">
+                    <div class="radio-form">
+                      <label class="custom_radio" for="arcade">
+                        <div class="icon-container">
+                          <img
+                            src="./assets/images/icon-arcade.svg"
+                            alt="arcade"
+                          />
+                        </div>
+                        <h3>Arcade</h3>
+                        <span class="billing-price">$9/mo</span>
+                        <input type="radio" id="arcade" name="billing" />
+                      </label>
+                    </div>
+
+                    <div class="radio-form">
+                      <label class="custom_radio" for="advanced">
+                        <div class="icon-container">
+                          <img
+                            src="./assets/images/icon-advanced.svg"
+                            alt="advanced"
+                          />
+                        </div>
+                        <h3>Advanced</h3>
+                        <span class="billing-price">$12/mo</span>
+                        <input type="radio" id="advanced" name="billing" />
+                      </label>
+                    </div>
+
+                    <div class="radio-form">
+                      <label class="custom_radio" for="pro">
+                        <div class="icon-container">
+                          <img src="./assets/images/icon-pro.svg" alt="pro" />
+                        </div>
+                        <h3>Pro</h3>
+                        <span class="billing-price">$15/mo</span>
+                        <input type="radio" id="pro" name="billing" />
+                      </label>
+                    </div>
+                  </div>
+                  <div class="billing-type-container">
+                    <h3 id="monthly" class="billing-type active">Monthly</h3>
+                    <div class="checkbox-wrapper">
+                      <input type="checkbox" id="switch" /><label
+                        for="switch"
+                      ></label>
+                    </div>
+                    <h3 id="yearly" class="billing-type">Yearly</h3>
+                  </div>
                 </div>
 
-                <div class="form-group">
-                  <label for="phone"> Phone Number </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    placeholder="e.g. +1 234 567 890"
-                  />
+                <div class="steps d-none">
+                  <div class="add-ons">
+                    <div class="add-ons-checkbox">
+                      <label class="add-ons_label" for="onlineservice">
+                        <div class="add-ons_container">
+                          <input
+                            type="checkbox"
+                            name="onlineservice"
+                            id="onlineservice"
+                          />
+                          <div>
+                            <h4 class="add-ons_title">Online service</h4>
+                            <p class="add-ons_info">
+                              Access to multiplayer games
+                            </p>
+                          </div>
+                        </div>
+                        <h5 class="add-ons-price">+$1/mo</h5>
+                      </label>
+                    </div>
+
+                    <div class="add-ons-checkbox">
+                      <label class="add-ons_label" for="largerstorage">
+                        <div class="add-ons_container">
+                          <input
+                            type="checkbox"
+                            name="largerstorage"
+                            id="largerstorage"
+                          />
+                          <div>
+                            <h4 class="add-ons_title">Larger storage</h4>
+                            <p class="add-ons_info">Extra 1TB of cloud save</p>
+                          </div>
+                        </div>
+                        <h5 class="add-ons-price">+$2/mo</h5>
+                      </label>
+                    </div>
+
+                    <div class="add-ons-checkbox">
+                      <label class="add-ons_label" for="customprofile">
+                        <div class="add-ons_container">
+                          <input
+                            type="checkbox"
+                            name="customprofile"
+                            id="customprofile"
+                          />
+                          <div>
+                            <h4 class="add-ons_title">Customizable pofile</h4>
+                            <p class="add-ons_info">
+                              Custom theme on you profile
+                            </p>
+                          </div>
+                        </div>
+                        <h5 class="add-ons-price">+$3/mo</h5>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="steps d-none">
+                  <div class="summary-container">
+                    <div class="chosen-feature">
+                      <div class="chosen-feature__details">
+                        <h4>Arcade (Monthly)</h4>
+                        <a href="">Change</a>
+                      </div>
+                      <h4>$9/mo</h4>
+                    </div>
+                    <hr />
+
+                    <div class="additionals">
+                      <div class="additional">
+                        <h4>Online service</h4>
+                        <h5>+1$/mo</h5>
+                      </div>
+                      <div class="additional">
+                        <h4>Larger storage</h4>
+                        <h5>+2$/mo</h5>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="total">
+                    <p>Total (per month)</p>
+                    <h3 class="total-price">+$12/mo</h3>
+                  </div>
+                </div>
+
+                <div class="steps d-none">
+                  <div class="step-5-container">
+                    <div class="icon-container">
+                      <img src="./assets/images/icon-thank-you.svg" alt="" />
+                    </div>
+                    <div class="step-5-container-content">
+                      <h1 class="form-title">Thank you!</h1>
+                      <p class="info-message">
+                        Thanks for confirming your subscription! We hope you
+                        have fun using our platform.If you ever need support,
+                        please feel free to email us at
+                        <a href="mailto:support@loremgaming.com"
+                          >support@loremgaming.com</a
+                        >.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
 
-            <div class="step-2 d-none">
-              <h1 class="form-title">Select your plan</h1>
-              <p class="form-info">
-                You have the option of monthly or yearly billing.
-              </p>
-
-              <form id="userForm">
-                <div class="billings">
-                  <div class="radio-form">
-                    <label class="custom_radio" for="arcade">
-                      <div class="icon-container">
-                        <img
-                          src="./assets/images/icon-arcade.svg"
-                          alt="arcade"
-                        />
-                      </div>
-                      <h3>Arcade</h3>
-                      <span class="billing-price">$9/mo</span>
-                      <input type="radio" id="arcade" name="billing" />
-                    </label>
-                  </div>
-
-                  <div class="radio-form">
-                    <label class="custom_radio" for="advanced">
-                      <div class="icon-container">
-                        <img
-                          src="./assets/images/icon-advanced.svg"
-                          alt="advanced"
-                        />
-                      </div>
-                      <h3>Advanced</h3>
-                      <span class="billing-price">$12/mo</span>
-                      <input type="radio" id="advanced" name="billing" />
-                    </label>
-                  </div>
-
-                  <div class="radio-form">
-                    <label class="custom_radio" for="pro">
-                      <div class="icon-container">
-                        <img src="./assets/images/icon-pro.svg" alt="pro" />
-                      </div>
-                      <h3>Pro</h3>
-                      <span class="billing-price">$15/mo</span>
-                      <input type="radio" id="pro" name="billing" />
-                    </label>
-                  </div>
-                </div>
-                <div class="billing-type-container">
-                  <h3 id="monthly" class="billing-type active">Monthly</h3>
-                  <div class="checkbox-wrapper">
-                    <input type="checkbox" id="switch" /><label
-                      for="switch"
-                    ></label>
-                  </div>
-                  <h3 id="yearly" class="billing-type">Yearly</h3>
-                </div>
-              </form>
-            </div>
-
-            <div class="step-3 d-none">
-              <h1 class="form-title">Pick add-ons</h1>
-              <p class="form-info">
-                Add-ons help enhance your gaming experience.
-              </p>
-
-              <form id="userForm">
-                <div class="add-ons">
-                  <div class="add-ons-checkbox">
-                    <label class="add-ons_label" for="onlineservice">
-                      <div class="add-ons_container">
-                        <input
-                          type="checkbox"
-                          name="onlineservice"
-                          id="onlineservice"
-                        />
-                        <div>
-                          <h4 class="add-ons_title">Online service</h4>
-                          <p class="add-ons_info">
-                            Access to multiplayer games
-                          </p>
-                        </div>
-                      </div>
-                      <h5 class="add-ons-price">+$1/mo</h5>
-                    </label>
-                  </div>
-
-                  <div class="add-ons-checkbox">
-                    <label class="add-ons_label" for="largerstorage">
-                      <div class="add-ons_container">
-                        <input
-                          type="checkbox"
-                          name="largerstorage"
-                          id="largerstorage"
-                        />
-                        <div>
-                          <h4 class="add-ons_title">Larger storage</h4>
-                          <p class="add-ons_info">Extra 1TB of cloud save</p>
-                        </div>
-                      </div>
-                      <h5 class="add-ons-price">+$2/mo</h5>
-                    </label>
-                  </div>
-
-                  <div class="add-ons-checkbox">
-                    <label class="add-ons_label" for="customprofile">
-                      <div class="add-ons_container">
-                        <input
-                          type="checkbox"
-                          name="customprofile"
-                          id="customprofile"
-                        />
-                        <div>
-                          <h4 class="add-ons_title">Customizable pofile</h4>
-                          <p class="add-ons_info">
-                            Custom theme on you profile
-                          </p>
-                        </div>
-                      </div>
-                      <h5 class="add-ons-price">+$3/mo</h5>
-                    </label>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <div class="step-4 d-nosne">
-              <h1 class="form-title">Finishing up</h1>
-              <p class="form-info">
-                Double-check everything looks OK before confirming.
-              </p>
-
-              <div class="summary-container">
-                <div class="chosen-feature">
-                  <div class="chosen-feature__details">
-                    <h4>Arcade (Monthly)</h4>
-                    <a href="">Change</a>
-                  </div>
-                  <h4>$9/mo</h4>
-                </div>
-                <hr />
-
-                <div class="additionals">
-                  <div class="additional">
-                    <h4>Online service</h4>
-                    <h5>+1$/mo</h5>
-                  </div>
-                  <div class="additional">
-                    <h4>Larger storage</h4>
-                    <h5>+2$/mo</h5>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="total">
-              <p>Total (per month)</p>
-              <h3 class="total-price">+$12/mo</h3>
-            </div>
             <div class="action-buttons">
-              <a class="back-btn" href="">Go Back</a>
-              <a class="next-btn btn" href="">Next Step</a>
+              <a id="back-btn" class="back-btn unvisible">Go Back</a>
+              <button id="confirm-btn" class="btn confirm-btn d-none">
+                Confirm
+              </button>
+              <a id="next-btn" class="next-btn btn">Next Step</a>
             </div>
           </div>
         </div>
@@ -275,5 +289,7 @@
         >Mirgubad Akbarov</a
       >.
     </div>
+
+    <script src="./assets/scripts/script.js"></script>
   </body>
 </html>

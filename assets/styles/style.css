@@ -214,6 +214,7 @@ main {
   width: 35px;
   height: 35px;
   border-radius: 100%;
+  cursor: pointer;
 
   a {
     color: var(--white);
@@ -226,7 +227,7 @@ main {
 }
 
 .step-num:not(.active) {
-  cursor: not-allowed;
+  /* cursor: not-allowed; */
 }
 .step-list__item {
   display: flex;

@@ -69,4 +69,36 @@ confirmBtn.addEventListener("click", () => {
     confirmBtn.classList.add("d-none");
 });
 
+stepNums.forEach((step, index) => {
+    step.addEventListener("click", () => {
+        if (index !== currentIndex) {
+            // Hide current step
+            stepsContent[currentIndex].classList.remove("d-block");
+            stepsContent[currentIndex].classList.add("d-none");
+            stepNums[currentIndex].classList.remove("active");
+
+            // Update current index
+            currentIndex = index;
+
+            // Show new step
+            stepsContent[currentIndex].classList.remove("d-none");
+            stepsContent[currentIndex].classList.add("d-block");
+            stepNums[currentIndex].classList.add("active");
+
+            // Update form title & description
+            formTitle.textContent = steps[currentIndex].title;
+            formDescription.textContent = steps[currentIndex].description;
+
+            // Toggle button visibility
+            backBtn.classList.toggle("visible", currentIndex > 0);
+            backBtn.classList.toggle("unvisible", currentIndex === 0);
+
+            nextBtn.classList.toggle("d-none", currentIndex === stepNums.length - 1);
+            confirmBtn.classList.toggle("d-none", currentIndex !== stepNums.length - 1);
+        }
+    });
+});
+
+
+
 updateStep();

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- displays site properly based on user's device -->
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+    <link rel="stylesheet" href="./assets/styles/style.css" />
+    <title>Frontend Mentor | Multi-step form</title>
+
+    <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+    <style>
+      .attribution {
+        font-size: 11px;
+        text-align: center;
+      }
+      .attribution a {
+        color: hsl(228, 45%, 44%);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="formsection">
+        <div class="modal">
+          <aside class="modal-sidebar">
+            <div class="modal-steps">
+              <ul class="step-list">
+                <li class="step-list__item">
+                  <a class="step-num active">1</a>
+                  <div class="step-info">
+                    <div class="step-info__num">Step 1</div>
+                    <div class="step-info__desc">Your info</div>
+                  </div>
+                </li>
+                <li class="step-list__item">
+                  <a class="step-num">2</a>
+                  <div class="step-info">
+                    <div class="step-info__num">Step 2</div>
+                    <div class="step-info__desc">Select plan</div>
+                  </div>
+                </li>
+                <li class="step-list__item">
+                  <a class="step-num">3</a>
+                  <div class="step-info">
+                    <div class="step-info__num">Step 3</div>
+                    <div class="step-info__desc">Add-ons</div>
+                  </div>
+                </li>
+                <li class="step-list__item">
+                  <a class="step-num">4</a>
+                  <div class="step-info">
+                    <div class="step-info__num">Step 4</div>
+                    <div class="step-info__desc">Summary</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          <div class="modal-forms">
+            <div class="step-1 d-none">
+              <h1 class="form-title">Personal info</h1>
+              <p class="form-info">
+                Please provide your name, email address, and phone number.
+              </p>
+
+              <form id="userForm">
+                <div class="form-group">
+                  <label for="name"> Name </label>
+                  <input
+                    type="text"
+                    id="name"
+                    placeholder="e.g. Stephen King"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="email"> Email Address </label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="e.g. stephenking@lorem.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="phone"> Phone Number </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    placeholder="e.g. +1 234 567 890"
+                  />
+                </div>
+              </form>
+            </div>
+
+            <div class="step-2 d-none">
+              <h1 class="form-title">Select your plan</h1>
+              <p class="form-info">
+                You have the option of monthly or yearly billing.
+              </p>
+
+              <form id="userForm">
+                <div class="billings">
+                  <div class="radio-form">
+                    <label class="custom_radio" for="arcade">
+                      <div class="icon-container">
+                        <img
+                          src="./assets/images/icon-arcade.svg"
+                          alt="arcade"
+                        />
+                      </div>
+                      <h3>Arcade</h3>
+                      <span class="billing-price">$9/mo</span>
+                      <input type="radio" id="arcade" name="billing" />
+                    </label>
+                  </div>
+
+                  <div class="radio-form">
+                    <label class="custom_radio" for="advanced">
+                      <div class="icon-container">
+                        <img
+                          src="./assets/images/icon-advanced.svg"
+                          alt="advanced"
+                        />
+                      </div>
+                      <h3>Advanced</h3>
+                      <span class="billing-price">$12/mo</span>
+                      <input type="radio" id="advanced" name="billing" />
+                    </label>
+                  </div>
+
+                  <div class="radio-form">
+                    <label class="custom_radio" for="pro">
+                      <div class="icon-container">
+                        <img src="./assets/images/icon-pro.svg" alt="pro" />
+                      </div>
+                      <h3>Pro</h3>
+                      <span class="billing-price">$15/mo</span>
+                      <input type="radio" id="pro" name="billing" />
+                    </label>
+                  </div>
+                </div>
+                <div class="billing-type-container">
+                  <h3 id="monthly" class="billing-type active">Monthly</h3>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="switch" /><label
+                      for="switch"
+                    ></label>
+                  </div>
+                  <h3 id="yearly" class="billing-type">Yearly</h3>
+                </div>
+              </form>
+            </div>
+
+            <div class="step-3 d-none">
+              <h1 class="form-title">Pick add-ons</h1>
+              <p class="form-info">
+                Add-ons help enhance your gaming experience.
+              </p>
+
+              <form id="userForm">
+                <div class="add-ons">
+                  <div class="add-ons-checkbox">
+                    <label class="add-ons_label" for="onlineservice">
+                      <div class="add-ons_container">
+                        <input
+                          type="checkbox"
+                          name="onlineservice"
+                          id="onlineservice"
+                        />
+                        <div>
+                          <h4 class="add-ons_title">Online service</h4>
+                          <p class="add-ons_info">
+                            Access to multiplayer games
+                          </p>
+                        </div>
+                      </div>
+                      <h5 class="add-ons-price">+$1/mo</h5>
+                    </label>
+                  </div>
+
+                  <div class="add-ons-checkbox">
+                    <label class="add-ons_label" for="largerstorage">
+                      <div class="add-ons_container">
+                        <input
+                          type="checkbox"
+                          name="largerstorage"
+                          id="largerstorage"
+                        />
+                        <div>
+                          <h4 class="add-ons_title">Larger storage</h4>
+                          <p class="add-ons_info">Extra 1TB of cloud save</p>
+                        </div>
+                      </div>
+                      <h5 class="add-ons-price">+$2/mo</h5>
+                    </label>
+                  </div>
+
+                  <div class="add-ons-checkbox">
+                    <label class="add-ons_label" for="customprofile">
+                      <div class="add-ons_container">
+                        <input
+                          type="checkbox"
+                          name="customprofile"
+                          id="customprofile"
+                        />
+                        <div>
+                          <h4 class="add-ons_title">Customizable pofile</h4>
+                          <p class="add-ons_info">
+                            Custom theme on you profile
+                          </p>
+                        </div>
+                      </div>
+                      <h5 class="add-ons-price">+$3/mo</h5>
+                    </label>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="step-4 d-nosne">
+              <h1 class="form-title">Finishing up</h1>
+              <p class="form-info">
+                Double-check everything looks OK before confirming.
+              </p>
+
+              <div class="summary-container">
+                <div class="chosen-feature">
+                  <div class="chosen-feature__details">
+                    <h4>Arcade (Monthly)</h4>
+                    <a href="">Change</a>
+                  </div>
+                  <h4>$9/mo</h4>
+                </div>
+                <hr />
+
+                <div class="additionals">
+                  <div class="additional">
+                    <h4>Online service</h4>
+                    <h5>+1$/mo</h5>
+                  </div>
+                  <div class="additional">
+                    <h4>Larger storage</h4>
+                    <h5>+2$/mo</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="total">
+              <p>Total (per month)</p>
+              <h3 class="total-price">+$12/mo</h3>
+            </div>
+            <div class="action-buttons">
+              <a class="back-btn" href="">Go Back</a>
+              <a class="next-btn btn" href="">Next Step</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="attribution">
+      Challenge by
+      <a href="https://www.frontendmentor.io?ref=challenge" target="_blank"
+        >Frontend Mentor</a
+      >. Coded by
+      <a href="https://www.linkedin.com/in/mirgubad-akbarov-191b32242/"
+        >Mirgubad Akbarov</a
+      >.
+    </div>
+  </body>
+</html>

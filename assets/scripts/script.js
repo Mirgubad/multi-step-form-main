@@ -53,6 +53,7 @@ backBtn.addEventListener("click", () => {
 });
 
 confirmBtn.addEventListener("click", () => {
+
     stepsContent[currentIndex].classList.remove("d-block");
     stepsContent[currentIndex].classList.add("d-none");
 
@@ -64,13 +65,16 @@ confirmBtn.addEventListener("click", () => {
     formTitle.classList.add("d-none");
     formDescription.classList.add("d-none");
 
-    nextBtn.classList.add("d-none");
-    backBtn.classList.add("d-none");
-    confirmBtn.classList.add("d-none");
+    document.querySelector(".action-buttons").remove();
+
+    return
 });
 
 stepNums.forEach((step, index) => {
     step.addEventListener("click", () => {
+        if (currentIndex == stepNums.length)
+            return
+
         if (index !== currentIndex) {
             // Hide current step
             stepsContent[currentIndex].classList.remove("d-block");

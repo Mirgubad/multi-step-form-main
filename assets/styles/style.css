@@ -154,6 +154,15 @@ main {
 .form-group input.invalid {
   border: 1.5px solid var(--strawberry-red);
 }
+/* 
+input[type="checkbox"].invalid {
+  border: 1.5px solid var(--strawberry-red);
+} */
+
+label:has(input[type="checkbox"].invalid) {
+  border: 1.5px solid var(--strawberry-red);
+}
+
 .form-labels {
   display: flex;
   justify-content: space-between;
@@ -258,8 +267,12 @@ main {
   transition: all 0.2s ease-in;
 }
 
-.custom_radio:hover,
-.custom_radio.active {
+.custom_radio:hover {
+  border-color: var(--marine-blue);
+  background: var(--magnolia);
+}
+
+label:has(input[type="radio"]:checked) {
   border-color: var(--marine-blue);
   background: var(--magnolia);
 }
@@ -279,6 +292,10 @@ main {
 .custom_radio {
   padding: 15px;
   cursor: pointer;
+
+  p {
+    color: var(--cool-gray);
+  }
 }
 
 input[type="radio"] {
@@ -286,8 +303,7 @@ input[type="radio"] {
 }
 
 .billing-price {
-  display: block;
-  color: var(--cool-gray);
+  display: inline-block;
   margin-block: 5px;
 }
 
@@ -359,21 +375,27 @@ input[type="radio"] {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease-in;
+
+  h5 {
+    color: var(--purplish-blue);
+  }
 }
 
-.add-ons_label.active,
 .add-ons_label:hover {
   background: var(--magnolia);
   border-color: var(--cool-gray);
+}
+
+label:has(input[type="checkbox"]:checked) {
+  border-color: var(--marine-blue);
+  background: var(--magnolia);
 }
 
 .add-ons_info {
   color: var(--cool-gray);
   margin-top: 5px;
 }
-.add-ons-price {
-  color: var(--purplish-blue);
-}
+
 .add-ons_container {
   display: flex;
   gap: 20px;
@@ -388,12 +410,17 @@ input[type="radio"] {
 .chosen-feature {
   display: flex;
   justify-content: space-between;
+  text-transform: capitalize;
 
   a {
     text-decoration: underline;
     display: inline-block;
     margin-bottom: 20px;
   }
+}
+
+#change_btn {
+  cursor: pointer;
 }
 
 .additionals {
@@ -406,6 +433,7 @@ input[type="radio"] {
     display: flex;
     margin-bottom: 20px;
     justify-content: space-between;
+    text-transform: capitalize;
     h4 {
       font-weight: 200;
     }

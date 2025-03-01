@@ -3,339 +3,464 @@
  * Implements form validation, state management, and UI updates for a multi-step form
  */
 
-// DOM Elements
-const form = document.getElementById("userForm");
-const formTitle = document.getElementById("form-title");
-const formDescription = document.getElementById("form-info");
-const nextBtn = document.getElementById("next-btn");
-const backBtn = document.getElementById("back-btn");
-const confirmBtn = document.getElementById("confirm-btn");
-const selectedPlan = document.getElementById("plan-title");
-const planPrice = document.getElementById("plan-price");
-const additionalsContainer = document.querySelector(".additionals");
-const stepNums = document.querySelectorAll(".step-num");
-const stepsContent = document.querySelectorAll(".steps");
-const totalPriceElement = document.getElementById("total-price");
-const changeBtn = document.getElementById("change_btn");
+// Form Configuration
+const PLANS = {
+    monthly: [9, 12, 15],
+    yearly: [90, 120, 150]
+};
 
-// Form State
-let currentIndex = 0;
-const completedSteps = [false, false, false, false];
+const ADD_ONS = {
+    monthly: [1, 2, 3],
+    yearly: [10, 20, 30]
+};
 
-// Form Data Store
-const formDataObject = {
-    step1: {
-        name: "",
-        email: "",
-        phoneNumber: ""
-    },
-    step2: {
-        billing: "",
-        billingPrice: 0
-    },
-    step3: {
-        addOns: [],
-        addOnsPrice: 0
+// Form State Management using a class-based approach
+class FormStateManager {
+    constructor() {
+        this.currentIndex = 0;
+        this.completedSteps = [false, false, false, false];
+        this.isYearlyBilling = false;
+
+        this.formData = {
+            step1: {
+                name: "",
+                email: "",
+                phoneNumber: ""
+            },
+            step2: {
+                billing: "",
+                billingPrice: 0
+            },
+            step3: {
+                addOns: [],
+                addOnsPrice: 0
+            }
+        };
+
+        // Step Configuration
+        this.steps = [
+            {
+                title: "Personal info",
+                description: "Please provide your name, email address, and phone number.",
+                validation: this.validatePersonalInfo.bind(this)
+            },
+            {
+                title: "Select your plan",
+                description: "You have the option of monthly or yearly billing.",
+                validation: this.validateBillingPlan.bind(this)
+            },
+            {
+                title: "Pick add-ons",
+                description: "Add-ons help enhance your gaming experience.",
+                validation: this.validateAddOns.bind(this)
+            },
+            {
+                title: "Finishing up",
+                description: "Double-check everything looks OK before confirming.",
+                validation: this.validateSummary.bind(this)
+            }
+        ];
+
+        this.initDOMElements();
+        this.bindEvents();
+        this.updateStep();
     }
-};
 
-/**
- * Extracts a numeric price from a string, handling currency symbols
- * @param {string} priceText - Price text (e.g. "$9.99")
- * @returns {number} - Parsed price
- */
-const extractPrice = (priceText) => {
-    if (!priceText) return 0;
-    // Remove currency symbols and other non-numeric characters except decimal point
-    const numericString = priceText.replace(/[^\d.-]/g, '');
-    return parseFloat(numericString) || 0;
-};
-
-/**
- * Updates the total price display
- */
-const updateTotalPrice = () => {
-    const totalPrice = formDataObject.step2.billingPrice + formDataObject.step3.addOnsPrice;
-    if (totalPriceElement) {
-        totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+    // Initialize DOM references
+    initDOMElements() {
+        this.elements = {
+            form: document.getElementById("userForm"),
+            formTitle: document.getElementById("form-title"),
+            formDescription: document.getElementById("form-info"),
+            nextBtn: document.getElementById("next-btn"),
+            backBtn: document.getElementById("back-btn"),
+            confirmBtn: document.getElementById("confirm-btn"),
+            selectedPlan: document.getElementById("plan-title"),
+            planPrice: document.getElementById("plan-price"),
+            additionalsContainer: document.querySelector(".additionals"),
+            stepNums: document.querySelectorAll(".step-num"),
+            stepsContent: document.querySelectorAll(".steps"),
+            totalPriceElement: document.getElementById("total-price"),
+            changeBtn: document.getElementById("change_btn"),
+            switchBilling: document.getElementById("switch"),
+            planType: document.getElementById("plan-type"),
+            totalInfo: document.getElementById("total-info")
+        };
     }
-};
 
-/**
- * Toggles validation error UI
- * @param {HTMLElement} element - Form element to validate
- * @param {boolean} isValid - Whether the element is valid
- */
-const toggleValidationUI = (element, isValid) => {
-    if (!element) return;
+    // Bind all event listeners
+    bindEvents() {
+        const { form, nextBtn, backBtn, changeBtn, stepNums, switchBilling } = this.elements;
 
-    const parentDiv = element.closest('div');
-    if (!parentDiv) return;
-
-    const validationMessage = parentDiv.querySelector('.validation-message');
-
-    if (isValid) {
-        element.classList.remove('invalid');
-        validationMessage?.classList.add('d-none');
-    } else {
-        element.classList.add('invalid');
-        validationMessage?.classList.remove('d-none');
-    }
-};
-
-/**
- * Resets all validation UI elements
- * @param {string} selector - CSS selector for elements to reset
- */
-const resetValidationUI = (selector) => {
-    document.querySelectorAll(selector).forEach(input => {
-        input.classList.remove('invalid');
-        const parentDiv = input.closest('div');
-        if (parentDiv) {
-            const validationMessage = parentDiv.querySelector('.validation-message');
-            validationMessage?.classList.add('d-none');
+        if (changeBtn) {
+            changeBtn.addEventListener("click", this.handleChangePlan.bind(this));
         }
-    });
-};
 
-// Step Validation Functions
-const stepValidations = {
-    // Personal Info Validation
-    validatePersonalInfo: () => {
+        if (nextBtn) {
+            nextBtn.addEventListener("click", this.handleNextStep.bind(this));
+        }
+
+        if (backBtn) {
+            backBtn.addEventListener("click", this.handlePrevStep.bind(this));
+        }
+
+        if (form) {
+            form.addEventListener("submit", this.handleSubmit.bind(this));
+        }
+
+        // Step navigation click handlers
+        if (stepNums) {
+            stepNums.forEach((step, index) => {
+                step.addEventListener("click", () => this.handleStepNavigation(index));
+            });
+        }
+
+        if (switchBilling) {
+            switchBilling.addEventListener("change", this.handleBillingToggle.bind(this));
+        }
+    }
+
+    /**
+     * Extracts a numeric price from a string, handling currency symbols
+     * @param {string} priceText - Price text (e.g. "$9.99")
+     * @returns {number} - Parsed price
+     */
+    extractPrice(priceText) {
+        if (!priceText) return 0;
+        // Remove currency symbols and other non-numeric characters except decimal point
+        const numericString = priceText.replace(/[^\d.-]/g, '');
+        return parseFloat(numericString) || 0;
+    }
+
+    /**
+     * Updates the total price display
+     */
+    updateTotalPrice() {
+        const { totalPriceElement, planType, totalInfo } = this.elements;
+        const totalPrice = this.formData.step2.billingPrice + this.formData.step3.addOnsPrice;
+
+        if (!totalPriceElement) return;
+
+        if (this.isYearlyBilling) {
+            totalPriceElement.textContent = `$${totalPrice.toFixed(2)}/Yr`;
+            if (planType) planType.textContent = "Yr";
+            if (totalInfo) totalInfo.textContent = "Total (per year)";
+        } else {
+            totalPriceElement.textContent = `$${totalPrice.toFixed(2)}/Mo`;
+            if (planType) planType.textContent = "Mo";
+            if (totalInfo) totalInfo.textContent = "Total (per month)";
+        }
+    }
+
+    /**
+     * Toggles validation error UI
+     * @param {HTMLElement} element - Form element to validate
+     * @param {boolean} isValid - Whether the element is valid
+     */
+    toggleValidationUI(element, isValid) {
+        if (!element) return;
+
+        const parentDiv = element.closest('div');
+        if (!parentDiv) return;
+
+        const validationMessage = parentDiv.querySelector('.validation-message');
+
+        if (isValid) {
+            element.classList.remove('invalid');
+            validationMessage?.classList.add('d-none');
+        } else {
+            element.classList.add('invalid');
+            validationMessage?.classList.remove('d-none');
+        }
+    }
+
+    /**
+     * Resets all validation UI elements
+     * @param {string} selector - CSS selector for elements to reset
+     */
+    resetValidationUI(selector) {
+        document.querySelectorAll(selector).forEach(input => {
+            input.classList.remove('invalid');
+            const parentDiv = input.closest('div');
+            if (parentDiv) {
+                const validationMessage = parentDiv.querySelector('.validation-message');
+                validationMessage?.classList.add('d-none');
+            }
+        });
+    }
+
+    // Validation Functions
+    validatePersonalInfo() {
         const name = document.querySelector('input[name="name"]');
         const email = document.querySelector('input[name="email"]');
         const phone = document.querySelector('input[name="phone"]');
 
-        resetValidationUI('input');
+        this.resetValidationUI('input');
 
         let isValid = true;
 
         // Name validation
-        const nameValid = name.value.trim() !== '';
-        toggleValidationUI(name, nameValid);
-        if (nameValid) {
-            formDataObject.step1.name = name.value.trim();
+        const nameValid = name?.value.trim() !== '';
+        this.toggleValidationUI(name, nameValid);
+        if (nameValid && name) {
+            this.formData.step1.name = name.value.trim();
         } else {
             isValid = false;
         }
 
         // Email validation
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const emailValid = email.value.trim() !== '' && emailPattern.test(email.value.trim());
-        toggleValidationUI(email, emailValid);
-        if (emailValid) {
-            formDataObject.step1.email = email.value.trim();
+        const emailValid = email?.value.trim() !== '' && email ? emailPattern.test(email.value.trim()) : false;
+        this.toggleValidationUI(email, emailValid);
+        if (emailValid && email) {
+            this.formData.step1.email = email.value.trim();
         } else {
             isValid = false;
         }
 
         // Phone validation
         const phonePattern = /^\+?[1-9]\d{1,14}$/;
-        const phoneValid = phone.value.trim() !== '' && phonePattern.test(phone.value.trim());
-        toggleValidationUI(phone, phoneValid);
-        if (phoneValid) {
-            formDataObject.step1.phoneNumber = phone.value.trim();
+        const phoneValid = phone?.value.trim() !== '' && phone ? phonePattern.test(phone.value.trim()) : false;
+        this.toggleValidationUI(phone, phoneValid);
+        if (phoneValid && phone) {
+            this.formData.step1.phoneNumber = phone.value.trim();
         } else {
             isValid = false;
         }
 
         return isValid;
-    },
+    }
 
-    // Billing Plan Validation
-    validateBillingPlan: () => {
+    validateBillingPlan() {
         const billing = document.querySelector('input[name="billing"]:checked');
         const billingInputs = document.querySelectorAll('input[name="billing"]');
 
-        resetValidationUI('input[name="billing"]');
+        this.resetValidationUI('input[name="billing"]');
 
         if (!billing) {
-            billingInputs.forEach(input => toggleValidationUI(input, false));
+            billingInputs.forEach(input => this.toggleValidationUI(input, false));
             return false;
         }
 
-        formDataObject.step2.billing = billing.value;
+        this.formData.step2.billing = billing.value;
 
         // Extract and store the billing price
         const billingPriceElement = billing.closest('.custom_radio')?.querySelector('.billing-price');
-        formDataObject.step2.billingPrice = billingPriceElement ?
-            extractPrice(billingPriceElement.textContent) : 0;
+        this.formData.step2.billingPrice = billingPriceElement ?
+            this.extractPrice(billingPriceElement.textContent) : 0;
 
-        updateTotalPrice();
+        this.updateTotalPrice();
         return true;
-    },
+    }
 
-    // Add-ons Validation
-    validateAddOns: () => {
+    validateAddOns() {
         const addOns = document.querySelectorAll('input[name="add-ons"]:checked');
         const addOnInputs = document.querySelectorAll('input[name="add-ons"]');
 
-        resetValidationUI('input[name="add-ons"]');
+        this.resetValidationUI('input[name="add-ons"]');
 
         if (addOns.length === 0) {
-            addOnInputs.forEach(input => toggleValidationUI(input, false));
+            addOnInputs.forEach(input => this.toggleValidationUI(input, false));
             return false;
         }
 
         // Create an array of objects with title and price for each selected add-on
-        formDataObject.step3.addOns = Array.from(addOns).map(addOn => {
+        this.formData.step3.addOns = Array.from(addOns).map(addOn => {
             const addOnContainer = addOn.closest('.add-ons-checkbox');
-            // Fix: Use consistent class name - try both variants
-            const titleElement =
-                addOnContainer.querySelector('.add-ons-title') ||
-                addOnContainer.querySelector('.add-ons_title');
+            // Try both class name variants
+            const titleElement = addOnContainer?.querySelector('.add-ons-title') ||
+                addOnContainer?.querySelector('.add-ons_title');
 
-            const priceElement = addOnContainer.querySelector('.add-ons-price');
+            const priceElement = addOnContainer?.querySelector('.add-ons-price');
 
             const title = titleElement ? titleElement.textContent.trim() : 'Unknown Add-on';
-            const price = priceElement ? extractPrice(priceElement.textContent) : 0;
+            const price = priceElement ? this.extractPrice(priceElement.textContent) : 0;
 
             return { title, price };
         });
 
         // Calculate the total price of selected add-ons
-        formDataObject.step3.addOnsPrice = formDataObject.step3.addOns.reduce(
+        this.formData.step3.addOnsPrice = this.formData.step3.addOns.reduce(
             (total, addOn) => total + addOn.price, 0
         );
 
-        updateTotalPrice();
+        this.updateTotalPrice();
         return true;
-    },
-
-    // Summary Step Validation (always valid)
-    validateSummary: () => true
-};
-
-// Step Configuration
-const steps = [
-    {
-        title: "Personal info",
-        description: "Please provide your name, email address, and phone number.",
-        validation: stepValidations.validatePersonalInfo
-    },
-    {
-        title: "Select your plan",
-        description: "You have the option of monthly or yearly billing.",
-        validation: stepValidations.validateBillingPlan
-    },
-    {
-        title: "Pick add-ons",
-        description: "Add-ons help enhance your gaming experience.",
-        validation: stepValidations.validateAddOns
-    },
-    {
-        title: "Finishing up",
-        description: "Double-check everything looks OK before confirming.",
-        validation: stepValidations.validateSummary
     }
-];
 
-/**
- * Updates summary step UI with selected plan and add-ons
- */
-const updateSummaryStep = () => {
-    // Display the selected plan price and name
-    if (planPrice) planPrice.textContent = `${formDataObject.step2.billingPrice.toFixed(2)}`;
-    if (selectedPlan) selectedPlan.textContent = formDataObject.step2.billing;
+    validateSummary() {
+        return true;
+    }
 
-    // Clear and rebuild the additionals container
-    if (additionalsContainer) {
-        additionalsContainer.innerHTML = '';
+    /**
+     * Updates summary step UI with selected plan and add-ons
+     */
+    updateSummaryStep() {
+        const { planPrice, selectedPlan, additionalsContainer } = this.elements;
 
-        // Append each additional item
-        formDataObject.step3.addOns.forEach((addOn) => {
-            const additionalDiv = document.createElement('div');
-            additionalDiv.classList.add('additional');
-            additionalDiv.innerHTML = `
-                <h4>${addOn.title}</h4>
-                <h5>+$${addOn.price.toFixed(2)}/mo</h5>
-            `;
-            additionalsContainer.appendChild(additionalDiv);
+        // Display the selected plan price and name
+        if (planPrice) planPrice.textContent = `${this.formData.step2.billingPrice.toFixed(2)}`;
+        if (selectedPlan) selectedPlan.textContent = this.formData.step2.billing;
+
+        // Clear and rebuild the additionals container
+        if (additionalsContainer) {
+            additionalsContainer.innerHTML = '';
+
+            // Append each additional item
+            this.formData.step3.addOns.forEach((addOn) => {
+                const additionalDiv = document.createElement('div');
+                additionalDiv.classList.add('additional');
+
+                const priceSuffix = this.isYearlyBilling ? '/yr' : '/mo';
+                additionalDiv.innerHTML = `
+          <h4>${addOn.title}</h4>
+          <h5>+$${addOn.price.toFixed(2)}${priceSuffix}</h5>
+        `;
+
+                additionalsContainer.appendChild(additionalDiv);
+            });
+        }
+    }
+
+    /**
+     * Validates the current step and returns whether it's valid
+     * @returns {boolean} - Whether the current step is valid
+     */
+    validateStep() {
+        const isValid = this.steps[this.currentIndex].validation();
+        if (isValid) {
+            this.completedSteps[this.currentIndex] = true;
+        }
+        return isValid;
+    }
+
+    /**
+     * Updates the UI based on the current step
+     */
+    updateStep() {
+        const { stepNums, stepsContent, formTitle, formDescription, backBtn, nextBtn, confirmBtn } = this.elements;
+
+        // Update step indicator UI
+        stepNums?.forEach((step, index) => {
+            step.classList.toggle("active", index === this.currentIndex);
         });
-    }
-};
 
-/**
- * Validates the current step and returns whether it's valid
- * @returns {boolean} - Whether the current step is valid
- */
-const validateStep = () => {
-    const isValid = steps[currentIndex].validation();
-    if (isValid) {
-        completedSteps[currentIndex] = true;
-    }
-    return isValid;
-};
+        // Show/hide appropriate step content
+        stepsContent?.forEach((content, index) => {
+            content.classList.toggle("d-block", index === this.currentIndex);
+            content.classList.toggle("d-none", index !== this.currentIndex);
+        });
 
-/**
- * Updates the UI based on the current step
- */
-const updateStep = () => {
-    // Update step indicator UI
-    stepNums.forEach((step, index) => {
-        step.classList.toggle("active", index === currentIndex);
-    });
+        // Update step title and description
+        if (formTitle) formTitle.textContent = this.steps[this.currentIndex].title;
+        if (formDescription) formDescription.textContent = this.steps[this.currentIndex].description;
 
-    // Show/hide appropriate step content
-    stepsContent.forEach((content, index) => {
-        content.classList.toggle("d-block", index === currentIndex);
-        content.classList.toggle("d-none", index !== currentIndex);
-    });
-
-    // Update step title and description
-    if (formTitle) formTitle.textContent = steps[currentIndex].title;
-    if (formDescription) formDescription.textContent = steps[currentIndex].description;
-
-    // Toggle navigation buttons
-    if (backBtn) {
-        backBtn.classList.toggle("visible", currentIndex > 0);
-        backBtn.classList.toggle("unvisible", currentIndex === 0);
-    }
-
-    if (nextBtn) {
-        nextBtn.classList.toggle("d-block", currentIndex < stepNums.length - 1);
-        nextBtn.classList.toggle("d-none", currentIndex === stepNums.length - 1);
-    }
-
-    if (confirmBtn) {
-        confirmBtn.classList.toggle("d-block", currentIndex === stepNums.length - 1);
-        confirmBtn.classList.toggle("d-none", currentIndex < stepNums.length - 1);
-    }
-
-    // Update summary UI if on the last step
-    if (currentIndex === 3) {
-        updateSummaryStep();
-    }
-};
-
-// Event Handlers
-if (changeBtn) {
-    changeBtn.addEventListener("click", () => {
-        currentIndex = 1;
-        updateStep();
-    });
-}
-
-if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-        if (validateStep() && currentIndex < stepNums.length - 1) {
-            currentIndex++;
-            updateStep();
+        // Toggle navigation buttons
+        if (backBtn) {
+            backBtn.classList.toggle("visible", this.currentIndex > 0);
+            backBtn.classList.toggle("unvisible", this.currentIndex === 0);
         }
-    });
-}
 
-if (backBtn) {
-    backBtn.addEventListener("click", () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateStep();
+        if (nextBtn) {
+            nextBtn.classList.toggle("d-block", this.currentIndex < stepNums.length - 1);
+            nextBtn.classList.toggle("d-none", this.currentIndex === stepNums.length - 1);
         }
-    });
-}
 
-if (form) {
-    form.addEventListener("submit", (e) => {
+        if (confirmBtn) {
+            confirmBtn.classList.toggle("d-block", this.currentIndex === stepNums.length - 1);
+            confirmBtn.classList.toggle("d-none", this.currentIndex < stepNums.length - 1);
+        }
+
+        // Update summary UI if on the last step
+        if (this.currentIndex === 3) {
+            this.updateSummaryStep();
+        }
+    }
+
+    // Event Handlers
+    handleChangePlan() {
+        this.currentIndex = 1;
+        this.updateStep();
+    }
+
+    handleNextStep() {
+        if (this.validateStep() && this.currentIndex < this.elements.stepNums.length - 1) {
+            this.currentIndex++;
+            this.updateStep();
+        }
+    }
+
+    handlePrevStep() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+            this.updateStep();
+        }
+    }
+
+    handleStepNavigation(index) {
+        // Prevent interactions if the form is completed
+        if (this.completedSteps[this.completedSteps.length - 1]) return;
+
+        // Don't allow moving forward if current step isn't completed
+        if (index > this.currentIndex && !this.completedSteps[this.currentIndex]) {
+            return;
+        }
+
+        // Allow backward navigation anytime
+        if (index <= this.currentIndex) {
+            this.currentIndex = index;
+            this.updateStep();
+        }
+        // Allow forward navigation only if previous steps completed
+        else if (this.completedSteps[index - 1]) {
+            this.currentIndex = index;
+            this.updateStep();
+        }
+    }
+
+    handleBillingToggle(e) {
+        const yearly = document.getElementById("yearly");
+        const monthly = document.getElementById("monthly");
+        const billingsBottom = document.querySelectorAll(".billings-bottom");
+        const addOnsInfo = document.querySelectorAll(".add-ons__info");
+
+        this.isYearlyBilling = e.target.checked;
+
+        if (this.isYearlyBilling) {
+            monthly?.classList.remove("active");
+            yearly?.classList.add("active");
+
+            billingsBottom.forEach((billing, index) => {
+                billing.innerHTML = `
+          <p>$<span class="billing-price">${PLANS.yearly[index]}</span>/yr</p>
+          <p class="billing-price__free">2 months free</p>
+        `;
+            });
+
+            addOnsInfo.forEach((info, index) => {
+                info.innerHTML = `
+          <h5>+$<span class="add-ons-price">${ADD_ONS.yearly[index]}</span>/yr</h5>
+        `;
+            });
+        } else {
+            yearly?.classList.remove("active");
+            monthly?.classList.add("active");
+
+            billingsBottom.forEach((billing, index) => {
+                billing.innerHTML = `
+          <p>$<span class="billing-price">${PLANS.monthly[index]}</span>/mo</p>
+        `;
+            });
+
+            addOnsInfo.forEach((info, index) => {
+                info.innerHTML = `
+          <h5>+$<span class="add-ons-price">${ADD_ONS.monthly[index]}</span>/mo</h5>
+        `;
+            });
+        }
+    }
+
+    handleSubmit(e) {
         e.preventDefault();
 
         if (typeof swal === 'undefined') {
@@ -351,15 +476,17 @@ if (form) {
         })
             .then((willConfirm) => {
                 if (willConfirm) {
-                    if (!validateStep()) {
+                    if (!this.validateStep()) {
                         swal("Please fill in all required fields.");
                         return;
                     }
 
+                    const { stepsContent, formTitle, formDescription } = this.elements;
+
                     // Hide current step content
-                    if (stepsContent[currentIndex]) {
-                        stepsContent[currentIndex].classList.remove("d-block");
-                        stepsContent[currentIndex].classList.add("d-none");
+                    if (stepsContent[this.currentIndex]) {
+                        stepsContent[this.currentIndex].classList.remove("d-block");
+                        stepsContent[this.currentIndex].classList.add("d-none");
                     }
 
                     // Show thank you/confirmation step
@@ -376,8 +503,9 @@ if (form) {
                     // Remove action buttons
                     const actionButtons = document.querySelector(".action-buttons");
                     if (actionButtons) actionButtons.remove();
+
                     // Log final form data
-                    console.log('Form submitted with data:', formDataObject);
+                    console.log('Form submitted with data:', this.formData);
                 } else {
                     swal("Form not submitted!");
                 }
@@ -386,32 +514,15 @@ if (form) {
                 console.error('SweetAlert error:', error);
                 alert('An error occurred while processing your submission. Please try again.');
             });
-    });
+    }
 }
 
-// Step navigation click handlers
-stepNums.forEach((step, index) => {
-    step.addEventListener("click", () => {
-        // Prevent interactions if the form is completed
-        if (completedSteps[completedSteps.length - 1]) return;
-
-        // Don't allow moving forward if current step isn't completed
-        if (index > currentIndex && !completedSteps[currentIndex]) {
-            return;
-        }
-
-        // Allow backward navigation anytime
-        if (index <= currentIndex) {
-            currentIndex = index;
-            updateStep();
-        }
-        // Allow forward navigation only if previous steps completed
-        else if (completedSteps[index - 1]) {
-            currentIndex = index;
-            updateStep();
-        }
-    });
+// Initialize the form when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        new FormStateManager();
+        console.log('Form handler initialized successfully');
+    } catch (error) {
+        console.error('Error initializing form handler:', error);
+    }
 });
-
-// Initialize the form UI
-updateStep();

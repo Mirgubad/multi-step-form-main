@@ -122,7 +122,10 @@
                           />
                         </div>
                         <h3>Arcade</h3>
-                        <p>$<span class="billing-price">9</span>/mo</p>
+                        <div class="billings-bottom">
+                          <p>$<span class="billing-price">9</span>/mo</p>
+                        </div>
+
                         <input
                           type="radio"
                           id="arcade"
@@ -143,7 +146,9 @@
                           />
                         </div>
                         <h3>Advanced</h3>
-                        <p>$<span class="billing-price">12</span>/mo</p>
+                        <div class="billings-bottom">
+                          <p>$<span class="billing-price">12</span>/mo</p>
+                        </div>
                         <input
                           type="radio"
                           id="advanced"
@@ -159,7 +164,9 @@
                           <img src="./assets/images/icon-pro.svg" alt="pro" />
                         </div>
                         <h3>Pro</h3>
-                        <p>$<span class="billing-price">15</span>/mo</p>
+                        <div class="billings-bottom">
+                          <p>$<span class="billing-price">15</span>/mo</p>
+                        </div>
                         <input
                           type="radio"
                           id="pro"
@@ -198,7 +205,9 @@
                             </p>
                           </div>
                         </div>
-                        <h5>+$<span class="add-ons-price">1</span>/mo</h5>
+                        <div class="add-ons__info">
+                          <h5>+$<span class="add-ons-price">1</span>/mo</h5>
+                        </div>
                       </label>
                     </div>
 
@@ -216,7 +225,9 @@
                             <p class="add-ons_info">Extra 1TB of cloud save</p>
                           </div>
                         </div>
-                        <h5>+$<span class="add-ons-price">2</span>/mo</h5>
+                        <div class="add-ons__info">
+                          <h5>+$<span class="add-ons-price">2</span>/mo</h5>
+                        </div>
                       </label>
                     </div>
 
@@ -236,7 +247,9 @@
                             </p>
                           </div>
                         </div>
-                        <h5>+$<span class="add-ons-price">3</span>/mo</h5>
+                        <div class="add-ons__info">
+                          <h5>+$<span class="add-ons-price">3</span>/mo</h5>
+                        </div>
                       </label>
                     </div>
                   </div>
@@ -249,7 +262,10 @@
                         <h4 id="plan-title">Arcade (Monthly)</h4>
                         <a id="change_btn">Change</a>
                       </div>
-                      <h4>$<span id="plan-price">9</span>/mo</h4>
+                      <h4>
+                        $<span id="plan-price">9</span
+                        ><span id="plan-type">/mo</span>
+                      </h4>
                     </div>
                     <hr />
 
@@ -265,7 +281,7 @@
                     </div>
                   </div>
                   <div class="total">
-                    <p>Total (per month)</p>
+                    <p id="total-info">Total (per month)</p>
                     <h3 id="total-price" class="total-price">+$12/mo</h3>
                   </div>
                 </div>
@@ -296,7 +312,7 @@
               <button
                 id="confirm-btn"
                 type="submit"
-                class="btn confirm-btn d-nones"
+                class="btn confirm-btn d-none"
                 form="userForm"
               >
                 Confirm

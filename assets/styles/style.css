@@ -93,6 +93,7 @@ main {
 .formsection {
   max-width: 930px;
   width: 90%;
+  min-height: 625px;
 }
 .attribution {
   padding-block: 20px;
@@ -103,6 +104,7 @@ main {
   color: hsl(228, 45%, 44%);
 }
 .modal {
+  min-height: 625px;
   background: var(--white);
   display: flex;
   padding: 15px;
@@ -119,6 +121,7 @@ main {
   padding: 60px;
   background-image: url("/assets/images/bg-sidebar-desktop.svg");
   background-repeat: no-repeat;
+  background-size: cover;
   border-radius: 10px;
   overflow: hidden;
   margin-right: 20px;

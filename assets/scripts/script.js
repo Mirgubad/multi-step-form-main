@@ -1,6 +1,7 @@
 /**
  * Multi-step Form Handler
  * Implements form validation, state management, and UI updates for a multi-step form
+ * with live validation feedback
  */
 
 // Form Configuration
@@ -61,8 +62,30 @@ class FormStateManager {
             }
         ];
 
+        this.validationRules = {
+            name: {
+                validate: (value) => value.trim() !== '',
+                message: 'Name is required'
+            },
+            email: {
+                validate: (value) => {
+                    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    return value.trim() !== '' && emailPattern.test(value.trim());
+                },
+                message: 'Please enter a valid email address'
+            },
+            phone: {
+                validate: (value) => {
+                    const phonePattern = /^\+?[1-9]\d{1,14}$/;
+                    return value.trim() !== '' && phonePattern.test(value.trim());
+                },
+                message: 'Please enter a valid phone number'
+            }
+        };
+
         this.initDOMElements();
         this.bindEvents();
+        this.setupLiveValidation();
         this.updateStep();
     }
 
@@ -84,8 +107,75 @@ class FormStateManager {
             changeBtn: document.getElementById("change_btn"),
             switchBilling: document.getElementById("switch"),
             planType: document.getElementById("plan-type"),
-            totalInfo: document.getElementById("total-info")
+            totalInfo: document.getElementById("total-info"),
+            personalInfoInputs: {
+                name: document.querySelector('input[name="name"]'),
+                email: document.querySelector('input[name="email"]'),
+                phone: document.querySelector('input[name="phone"]')
+            }
         };
+    }
+
+    // Set up live validation for all form inputs
+    setupLiveValidation() {
+        const { personalInfoInputs } = this.elements;
+
+        // Set up input event listeners for text fields
+        Object.entries(personalInfoInputs).forEach(([fieldName, input]) => {
+            if (!input) return;
+
+            // Add input and blur event listeners for live validation
+            input.addEventListener('input', () => this.validateField(fieldName, input));
+            input.addEventListener('blur', () => this.validateField(fieldName, input));
+        });
+
+        // Set up change listeners for radio buttons and checkboxes
+        const billingOptions = document.querySelectorAll('input[name="billing"]');
+        billingOptions.forEach(option => {
+            option.addEventListener('change', () => {
+                this.validateBillingPlan();
+            });
+        });
+
+        const addOnOptions = document.querySelectorAll('input[name="add-ons"]');
+        addOnOptions.forEach(option => {
+            option.addEventListener('change', () => {
+                this.validateAddOns();
+            });
+        });
+    }
+
+    /**
+     * Validates a specific field using defined validation rules
+     * @param {string} fieldName - The name of the field to validate
+     * @param {HTMLElement} input - The input element to validate
+     * @returns {boolean} - Whether the field is valid
+     */
+    validateField(fieldName, input) {
+        if (!input || !this.validationRules[fieldName]) return false;
+
+        const rule = this.validationRules[fieldName];
+        const isValid = rule.validate(input.value);
+
+        this.toggleValidationUI(input, isValid);
+
+        // Update validation message if needed
+        const parentDiv = input.closest('div');
+        if (parentDiv) {
+            const validationMessage = parentDiv.querySelector('.validation-message');
+            if (validationMessage) {
+                validationMessage.textContent = isValid ? '' : rule.message;
+            }
+        }
+
+        // Update form data if valid
+        if (isValid) {
+            if (fieldName === 'name') this.formData.step1.name = input.value.trim();
+            if (fieldName === 'email') this.formData.step1.email = input.value.trim();
+            if (fieldName === 'phone') this.formData.step1.phoneNumber = input.value.trim();
+        }
+
+        return isValid;
     }
 
     // Bind all event listeners
@@ -191,42 +281,19 @@ class FormStateManager {
 
     // Validation Functions
     validatePersonalInfo() {
-        const name = document.querySelector('input[name="name"]');
-        const email = document.querySelector('input[name="email"]');
-        const phone = document.querySelector('input[name="phone"]');
-
-        this.resetValidationUI('input');
-
+        const { personalInfoInputs } = this.elements;
         let isValid = true;
 
-        // Name validation
-        const nameValid = name?.value.trim() !== '';
-        this.toggleValidationUI(name, nameValid);
-        if (nameValid && name) {
-            this.formData.step1.name = name.value.trim();
-        } else {
-            isValid = false;
-        }
+        // Validate each field and accumulate the results
+        Object.entries(personalInfoInputs).forEach(([fieldName, input]) => {
+            if (!input) {
+                isValid = false;
+                return;
+            }
 
-        // Email validation
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const emailValid = email?.value.trim() !== '' && email ? emailPattern.test(email.value.trim()) : false;
-        this.toggleValidationUI(email, emailValid);
-        if (emailValid && email) {
-            this.formData.step1.email = email.value.trim();
-        } else {
-            isValid = false;
-        }
-
-        // Phone validation
-        const phonePattern = /^\+?[1-9]\d{1,14}$/;
-        const phoneValid = phone?.value.trim() !== '' && phone ? phonePattern.test(phone.value.trim()) : false;
-        this.toggleValidationUI(phone, phoneValid);
-        if (phoneValid && phone) {
-            this.formData.step1.phoneNumber = phone.value.trim();
-        } else {
-            isValid = false;
-        }
+            const fieldValid = this.validateField(fieldName, input);
+            isValid = isValid && fieldValid;
+        });
 
         return isValid;
     }
@@ -458,6 +525,9 @@ class FormStateManager {
         `;
             });
         }
+
+        // Re-validate the billing plan after switching
+        this.validateBillingPlan();
     }
 
     handleSubmit(e) {
@@ -465,6 +535,17 @@ class FormStateManager {
 
         if (typeof swal === 'undefined') {
             console.error('SweetAlert is not defined. Make sure it is properly loaded.');
+            // Fallback to browser's built-in confirm
+            if (!window.confirm("Are you sure you want to submit the form? You will not be able to edit it.")) {
+                return;
+            }
+
+            if (!this.validateStep()) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            this.completeForm();
             return;
         }
 
@@ -481,31 +562,7 @@ class FormStateManager {
                         return;
                     }
 
-                    const { stepsContent, formTitle, formDescription } = this.elements;
-
-                    // Hide current step content
-                    if (stepsContent[this.currentIndex]) {
-                        stepsContent[this.currentIndex].classList.remove("d-block");
-                        stepsContent[this.currentIndex].classList.add("d-none");
-                    }
-
-                    // Show thank you/confirmation step
-                    const thankYouStep = stepsContent.length - 1;
-                    if (stepsContent[thankYouStep]) {
-                        stepsContent[thankYouStep].classList.remove("d-none");
-                        stepsContent[thankYouStep].classList.add("d-block");
-                    }
-
-                    // Hide form elements
-                    if (formTitle) formTitle.classList.add("d-none");
-                    if (formDescription) formDescription.classList.add("d-none");
-
-                    // Remove action buttons
-                    const actionButtons = document.querySelector(".action-buttons");
-                    if (actionButtons) actionButtons.remove();
-
-                    // Log final form data
-                    console.log('Form submitted with data:', this.formData);
+                    this.completeForm();
                 } else {
                     swal("Form not submitted!");
                 }
@@ -514,6 +571,37 @@ class FormStateManager {
                 console.error('SweetAlert error:', error);
                 alert('An error occurred while processing your submission. Please try again.');
             });
+    }
+
+    /**
+     * Complete the form submission and show thank you page
+     */
+    completeForm() {
+        const { stepsContent, formTitle, formDescription } = this.elements;
+
+        // Hide current step content
+        if (stepsContent[this.currentIndex]) {
+            stepsContent[this.currentIndex].classList.remove("d-block");
+            stepsContent[this.currentIndex].classList.add("d-none");
+        }
+
+        // Show thank you/confirmation step
+        const thankYouStep = stepsContent.length - 1;
+        if (stepsContent[thankYouStep]) {
+            stepsContent[thankYouStep].classList.remove("d-none");
+            stepsContent[thankYouStep].classList.add("d-block");
+        }
+
+        // Hide form elements
+        if (formTitle) formTitle.classList.add("d-none");
+        if (formDescription) formDescription.classList.add("d-none");
+
+        // Remove action buttons
+        const actionButtons = document.querySelector(".action-buttons");
+        if (actionButtons) actionButtons.remove();
+
+        // Log final form data
+        console.log('Form submitted with data:', this.formData);
     }
 }
 
